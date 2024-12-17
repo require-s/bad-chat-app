@@ -34,7 +34,9 @@ async fn index() -> Markup {
         "Home",
         html! {
             h1 { "A Very Bad Chat App" }
-            div.messages hx-get="/messages" hx-trigger="every 5s" {}
+            div.messages hx-get="/messages" hx-trigger="load, every 2s" {}
+
+            button hx-get="/messages" hx-target=".messages" { "refresh" }
 
             form hx-post="/messages" hx-swap="none" {
                 label for="author" { "Name" }
@@ -42,6 +44,7 @@ async fn index() -> Markup {
                 br;
                 label for="content" { "Message" }
                 input name="content" type="text" placeholder="Type your message here";
+                br;
                 button type="submit" { "Send" }
             }
         },
@@ -69,6 +72,9 @@ struct Message {
 async fn post_message(State(state): State<MutState>, Form(msg): Form<Message>) {
     let mut state = state.write().await;
     state.messages.push(msg);
+    if state.messages.len() > state.max_messages {
+        state.messages.remove(0);
+    }
 }
 
 async fn static_route(Path(file): Path<String>) -> Result<impl IntoResponse> {
@@ -89,12 +95,14 @@ type MutState = Arc<RwLock<AppState>>;
 #[derive(Clone)]
 struct AppState {
     messages: Vec<Message>,
+    max_messages: usize,
 }
 
 impl AppState {
     fn new() -> Self {
         AppState {
             messages: Vec::new(),
+            max_messages: 10,
         }
     }
 }

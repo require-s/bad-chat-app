@@ -40,3 +40,7 @@ main>*+* {
     top: -0.3em;
     background-color: white;
 }
+
+form label {
+    margin-right: 0.2em;
+}
