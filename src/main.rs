@@ -1,6 +1,6 @@
 use crate::errors::*;
 use axum::{
-    extract::{Path, State}, http::header, response::{IntoResponse, Response}, routing::{get, post}, Form, Router
+    extract::{Path, State}, http::header, response::IntoResponse, routing::{get, post}, Form, Router
 };
 use maud::{html, Markup, DOCTYPE};
 use serde::Deserialize;
