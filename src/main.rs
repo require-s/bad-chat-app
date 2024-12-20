@@ -1,10 +1,14 @@
 use crate::errors::*;
 use axum::{
-    extract::{Path, State}, http::header, response::IntoResponse, routing::{get, post}, Form, Router
+    extract::{Path, State},
+    http::header,
+    response::IntoResponse,
+    routing::{get, post},
+    Form, Router,
 };
 use maud::{html, Markup, DOCTYPE};
 use serde::Deserialize;
-use std::{fs::read_to_string, io, sync::Arc};
+use std::{io, sync::Arc};
 use tokio::{net::TcpListener, sync::RwLock};
 
 mod errors;
@@ -79,7 +83,7 @@ async fn post_message(State(state): State<MutState>, Form(msg): Form<Message>) {
 
 async fn static_route(Path(file): Path<String>) -> Result<impl IntoResponse> {
     let ext = file.rsplit(".").next();
-    let file = read_to_string("static/".to_owned() + &file)?;
+    let file = tokio::fs::read_to_string("static/".to_owned() + &file).await?;
     let mime = match ext {
         Some("css") => "text/css",
         Some("js") => "text/javascript",
