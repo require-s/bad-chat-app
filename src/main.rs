@@ -8,7 +8,7 @@ use axum::{
 };
 use maud::{html, Markup, DOCTYPE};
 use serde::Deserialize;
-use std::{io, sync::Arc};
+use std::{collections::VecDeque, io, sync::Arc};
 use tokio::{net::TcpListener, sync::RwLock};
 
 mod errors;
@@ -75,9 +75,9 @@ struct Message {
 
 async fn post_message(State(state): State<MutState>, Form(msg): Form<Message>) {
     let mut state = state.write().await;
-    state.messages.push(msg);
+    state.messages.push_back(msg);
     if state.messages.len() > state.max_messages {
-        state.messages.remove(0);
+        state.messages.pop_front();
     }
 }
 
@@ -98,14 +98,14 @@ type MutState = Arc<RwLock<AppState>>;
 
 #[derive(Clone)]
 struct AppState {
-    messages: Vec<Message>,
+    messages: VecDeque<Message>,
     max_messages: usize,
 }
 
 impl AppState {
     fn new() -> Self {
         AppState {
-            messages: Vec::new(),
+            messages: VecDeque::new(),
             max_messages: 10,
         }
     }
